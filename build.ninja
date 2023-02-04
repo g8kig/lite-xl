@@ -1,0 +1,97 @@
+
+ninja_required_version = 1.8.2
+
+rule c_COMPILER
+ command = gcc $ARGS -MD -MQ $out -MF $DEPFILE -o $out "-c" $in
+ deps = gcc
+ depfile = $DEPFILE_UNQUOTED
+ description = compile "$in"
+
+rule c_LINKER
+ command = gcc $ARGS -o $out $in $LINK_ARGS
+ description = link "$out"
+
+rule c_COPY
+ command = xcopy /s/y/i/q $in\*.* $out
+ description = $DESC
+ restat = 1
+
+rule CUSTOM_COMMAND_DEP
+ command = $COMMAND
+ deps = gcc
+ depfile = $DEPFILE_UNQUOTED
+ description = $DESC 
+ restat = 1
+
+build obj/rc_icon.o: CUSTOM_COMMAND_DEP ./resources/icons/icon.rc | C$:/MinGW/bin/windres.EXE
+ DEPFILE = "obj/rc_icon.o.d"
+ DEPFILE_UNQUOTED = obj/rc_icon.o.d
+ COMMAND = "C:\MinGW\bin/windres.EXE" "./resources/icons/icon.rc" "obj/rc_icon.o" "--preprocessor-arg=-MD" "--preprocessor-arg=-MQobj/rc_icon.o" "--preprocessor-arg=-MFobj/rc_icon.o.d"
+
+build obj/api.c.o: c_COMPILER ./src/api/api.c
+ DEPFILE = "obj/api.c.o.d"
+ DEPFILE_UNQUOTED = obj/api.c.o.d
+ ARGS = "-Iobj" "-I./src" "-IC:/MinGW/include" "-IC:/MinGW/include/SDL2" "-IC:/MinGW/include/freetype2" "-IC:/MinGW/include/libpng16" "-fdiagnostics-color=always" "-D_FILE_OFFSET_BITS=64" "-Wall" "-Winvalid-pch" "-std=gnu11" "-O1" "-g" "-Dmain=SDL_main" "-DSDL_MAIN_HANDLED" "-DPCRE2_STATIC"
+
+build obj/api_renderer.c.o: c_COMPILER ./src/api/renderer.c
+ DEPFILE = "obj/api_renderer.c.o.d"
+ DEPFILE_UNQUOTED = obj/api_renderer.c.o.d
+ ARGS = "-Iobj" "-I./src" "-IC:/MinGW/include" "-IC:/MinGW/include/SDL2" "-IC:/MinGW/include/freetype2" "-IC:/MinGW/include/libpng16" "-fdiagnostics-color=always" "-D_FILE_OFFSET_BITS=64" "-Wall" "-Winvalid-pch" "-std=gnu11" "-O1" "-g" "-Dmain=SDL_main" "-DSDL_MAIN_HANDLED" "-DPCRE2_STATIC"
+
+build obj/regex.c.o: c_COMPILER ./src/api/regex.c
+ DEPFILE = "obj/regex.c.o.d"
+ DEPFILE_UNQUOTED = obj/regex.c.o.d
+ ARGS = "-Iobj" "-I./src" "-IC:/MinGW/include" "-IC:/MinGW/include/SDL2" "-IC:/MinGW/include/freetype2" "-IC:/MinGW/include/libpng16" "-fdiagnostics-color=always" "-D_FILE_OFFSET_BITS=64" "-Wall" "-Winvalid-pch" "-std=gnu11" "-O1" "-g" "-Dmain=SDL_main" "-DSDL_MAIN_HANDLED" "-DPCRE2_STATIC"
+
+build obj/system.c.o: c_COMPILER ./src/api/system.c
+ DEPFILE = "obj/system.c.o.d"
+ DEPFILE_UNQUOTED = obj/system.c.o.d
+ ARGS = "-Iobj" "-I./src" "-IC:/MinGW/include" "-IC:/MinGW/include/SDL2" "-IC:/MinGW/include/freetype2" "-IC:/MinGW/include/libpng16" "-fdiagnostics-color=always" "-D_FILE_OFFSET_BITS=64" "-Wall" "-Winvalid-pch" "-std=gnu11" "-O1" "-g" "-Dmain=SDL_main" "-DSDL_MAIN_HANDLED" "-DPCRE2_STATIC"
+
+build obj/process.c.o: c_COMPILER ./src/api/process.c
+ DEPFILE = "obj/process.c.o.d"
+ DEPFILE_UNQUOTED = obj/process.c.o.d
+ ARGS = "-Iobj" "-I./src" "-IC:/MinGW/include" "-IC:/MinGW/include/SDL2" "-IC:/MinGW/include/freetype2" "-IC:/MinGW/include/libpng16" "-fdiagnostics-color=always" "-D_FILE_OFFSET_BITS=64" "-Wall" "-Winvalid-pch" "-std=gnu11" "-O1" "-g" "-Dmain=SDL_main" "-DSDL_MAIN_HANDLED" "-DPCRE2_STATIC"
+
+build obj/utf8.c.o: c_COMPILER ./src/api/utf8.c
+ DEPFILE = "obj/utf8.c.o.d"
+ DEPFILE_UNQUOTED = obj/utf8.c.o.d
+ ARGS = "-Iobj" "-I./src" "-IC:/MinGW/include" "-IC:/MinGW/include/SDL2" "-IC:/MinGW/include/freetype2" "-IC:/MinGW/include/libpng16" "-fdiagnostics-color=always" "-D_FILE_OFFSET_BITS=64" "-Wall" "-Winvalid-pch" "-std=gnu11" "-O1" "-g" "-Dmain=SDL_main" "-DSDL_MAIN_HANDLED" "-DPCRE2_STATIC"
+
+build obj/renderer.c.o: c_COMPILER ./src/renderer.c
+ DEPFILE = "obj/renderer.c.o.d"
+ DEPFILE_UNQUOTED = obj/renderer.c.o.d
+ ARGS = "-Iobj" "-I./src" "-IC:/MinGW/include" "-IC:/MinGW/include/SDL2" "-IC:/MinGW/include/freetype2" "-IC:/MinGW/include/libpng16" "-fdiagnostics-color=always" "-D_FILE_OFFSET_BITS=64" "-Wall" "-Winvalid-pch" "-std=gnu11" "-O1" "-g" "-Dmain=SDL_main" "-DSDL_MAIN_HANDLED" "-DPCRE2_STATIC"
+
+build obj/renwindow.c.o: c_COMPILER ./src/renwindow.c
+ DEPFILE = "obj/renwindow.c.o.d"
+ DEPFILE_UNQUOTED = obj/renwindow.c.o.d
+ ARGS = "-Iobj" "-I./src" "-IC:/MinGW/include" "-IC:/MinGW/include/SDL2" "-IC:/MinGW/include/freetype2" "-IC:/MinGW/include/libpng16" "-fdiagnostics-color=always" "-D_FILE_OFFSET_BITS=64" "-Wall" "-Winvalid-pch" "-std=gnu11" "-O1" "-g" "-Dmain=SDL_main" "-DSDL_MAIN_HANDLED" "-DPCRE2_STATIC"
+
+build obj/rencache.c.o: c_COMPILER ./src/rencache.c
+ DEPFILE = "obj/rencache.c.o.d"
+ DEPFILE_UNQUOTED = obj/rencache.c.o.d
+ ARGS = "-Iobj" "-I./src" "-IC:/MinGW/include" "-IC:/MinGW/include/SDL2" "-IC:/MinGW/include/freetype2" "-IC:/MinGW/include/libpng16" "-fdiagnostics-color=always" "-D_FILE_OFFSET_BITS=64" "-Wall" "-Winvalid-pch" "-std=gnu11" "-O1" "-g" "-Dmain=SDL_main" "-DSDL_MAIN_HANDLED" "-DPCRE2_STATIC"
+
+build obj/main.c.o: c_COMPILER ./src/main.c
+ DEPFILE = "obj/main.c.o.d"
+ DEPFILE_UNQUOTED = obj/main.c.o.d
+ ARGS = "-Iobj" "-I./src" "-IC:/MinGW/include" "-IC:/MinGW/include/SDL2" "-IC:/MinGW/include/freetype2" "-IC:/MinGW/include/libpng16" "-fdiagnostics-color=always" "-D_FILE_OFFSET_BITS=64" "-Wall" "-Winvalid-pch" "-std=gnu11" "-O1" "-g" "-Dmain=SDL_main" "-DSDL_MAIN_HANDLED" "-DPCRE2_STATIC"
+
+build obj/dirmonitor.c.o: c_COMPILER ./src/api/dirmonitor.c
+ DEPFILE = "obj/dirmonitor.c.o.d"
+ DEPFILE_UNQUOTED = obj/dirmonitor.c.o.d
+ ARGS = "-Iobj" "-I./src" "-IC:/MinGW/include" "-IC:/MinGW/include/SDL2" "-IC:/MinGW/include/freetype2" "-IC:/MinGW/include/libpng16" "-fdiagnostics-color=always" "-D_FILE_OFFSET_BITS=64" "-Wall" "-Winvalid-pch" "-std=gnu11" "-O1" "-g" "-Dmain=SDL_main" "-DSDL_MAIN_HANDLED" "-DPCRE2_STATIC"
+
+build obj/dirmonitor_win32.c.o: c_COMPILER ./src/api/dirmonitor/win32.c
+ DEPFILE = "obj/dirmonitor_win32.c.o.d"
+ DEPFILE_UNQUOTED = obj/dirmonitor_win32.c.o.d
+ ARGS = "-Iobj" "-I./src" "-IC:/MinGW/include" "-IC:/MinGW/include/SDL2" "-IC:/MinGW/include/freetype2" "-IC:/MinGW/include/libpng16" "-fdiagnostics-color=always" "-D_FILE_OFFSET_BITS=64" "-Wall" "-Winvalid-pch" "-std=gnu11" "-O1" "-g" "-Dmain=SDL_main" "-DSDL_MAIN_HANDLED" "-DPCRE2_STATIC"
+
+build out\lite-xl.exe: c_LINKER obj/rc_icon.o obj/api.c.o obj/api_renderer.c.o obj/regex.c.o obj/system.c.o obj/process.c.o obj/utf8.c.o obj/renderer.c.o obj/renwindow.c.o obj/rencache.c.o obj/main.c.o obj/dirmonitor.c.o obj/dirmonitor_win32.c.o
+ LINK_ARGS = "-Wl,--allow-shlib-undefined" "-Wl,--start-group" "-Wl,--subsystem,windows" "-mwindows" "-llua" "-lm" "-lmingw32" "-lSDL2main" "-lSDL2" "-lfreetype" "-lz" "-lfreetype" "-lpng" "-lpcre2-8" "-lkernel32" "-luser32" "-lgdi32" "-lwinspool" "-lshell32" "-lole32" "-loleaut32" "-luuid" "-lcomdlg32" "-ladvapi32" "-lsetupapi" "-lwinmm" "-limm32" "-lversion" "-Wl,--end-group"
+
+build out\data: c_COPY .\data
+
+default out\lite-xl.exe out\data
+
