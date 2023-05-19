@@ -17,6 +17,7 @@
 
 #include <lauxlib.h>
 #include "rencache.h"
+#include "renwindow.h"
 
 /* a cache over the software renderer -- all drawing operations are stored as
 ** commands when issued. At the end of the frame we write the commands to a grid
@@ -141,7 +142,7 @@ static void* push_command(enum CommandType type, int size) {
   int n = command_buf_idx + size;
   while (n > command_buf_size) {
     if (!expand_command_buffer()) {
-      fprintf(stderr, "Warning: (" __FILE__ "): unable to resize command buffer (%ld)\n",
+      fprintf(stderr, "Warning: (" __FILE__ "): unable to resize command buffer (%zu)\n",
               (size_t)(command_buf_size * CMD_BUF_RESIZE_RATE));
       resize_issue = true;
       return NULL;
@@ -299,6 +300,7 @@ void rencache_end_frame(RenWindow *window_renderer) {
     *r = intersect_rects(*r, screen_rect);
   }
 
+  RenSurface rs = renwin_get_surface(window_renderer);
   /* redraw updated regions */
   for (int i = 0; i < rect_count; i++) {
     /* draw */
@@ -315,18 +317,18 @@ void rencache_end_frame(RenWindow *window_renderer) {
           ren_set_clip_rect(window_renderer, intersect_rects(ccmd->rect, r));
           break;
         case DRAW_RECT:
-          ren_draw_rect(window_renderer, rcmd->rect, rcmd->color);
+          ren_draw_rect(&rs, rcmd->rect, rcmd->color);
           break;
         case DRAW_TEXT:
           ren_font_group_set_tab_size(tcmd->fonts, tcmd->tab_size);
-          ren_draw_text(window_renderer, tcmd->fonts, tcmd->text, tcmd->len, tcmd->text_x, tcmd->rect.y, tcmd->color);
+          ren_draw_text(&rs, tcmd->fonts, tcmd->text, tcmd->len, tcmd->text_x, tcmd->rect.y, tcmd->color);
           break;
       }
     }
 
     if (show_debug) {
       RenColor color = { rand(), rand(), rand(), 50 };
-      ren_draw_rect(window_renderer, r, color);
+      ren_draw_rect(&rs, r, color);
     }
   }
 

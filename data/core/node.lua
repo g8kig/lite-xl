@@ -60,6 +60,13 @@ function Node:on_mouse_left()
   end
 end
 
+function Node:on_touch_moved(...)
+  if self.type == "leaf" then
+    self.active_view:on_touch_moved(...)
+  else
+    self:propagate("on_touch_moved", ...)
+  end
+end
 
 function Node:consume(node)
   for k, _ in pairs(self) do self[k] = nil end
@@ -301,7 +308,7 @@ function Node:tab_hovered_update(px, py)
     if px >= cx and px < cx + cw and py >= y and py < y + h and config.tab_close_button then
       self.hovered_close = tab_index
     end
-  else
+  elseif #self.views > self:get_visible_tabs_number() then
     self.hovered_scroll_button = self:get_scroll_button_index(px, py) or 0
   end
 end
@@ -605,6 +612,13 @@ function Node:is_empty()
   else
     return self.a:is_empty() and self.b:is_empty()
   end
+end
+
+
+function Node:is_in_tab_area(x, y)
+  if not self:should_show_tabs() then return false end
+  local _, ty, _, th = self:get_scroll_button_rect(1)
+  return y >= ty and y < ty + th
 end
 
 
