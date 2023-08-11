@@ -1197,7 +1197,9 @@ function core.custom_log(level, show, backtrace, fmt, ...)
   local text = string.format(fmt, ...)
   if show then
     local s = style.log[level]
-    core.status_view:show_message(s.icon, s.color, text)
+    if core.status_view then
+      core.status_view:show_message(s.icon, s.color, text)
+    end
   end
 
   local info = debug.getinfo(2, "Sl")
@@ -1427,12 +1429,17 @@ end)
 
 function core.run()
   local next_step
+  local last_frame_time
   while true do
     core.frame_start = system.get_time()
     local time_to_wake = run_threads()
     local did_redraw = false
-    if not next_step or system.get_time() >= next_step then
-      did_redraw = core.step()
+    local force_draw = core.redraw and last_frame_time and core.frame_start - last_frame_time > (1 / config.fps)
+    if force_draw or not next_step or system.get_time() >= next_step then
+      if core.step() then
+        did_redraw = true
+        last_frame_time = core.frame_start
+      end
       next_step = nil
     end
     if core.restart_request or core.quit_request then break end
@@ -1487,6 +1494,17 @@ function core.on_error(err)
       doc:save(doc.filename .. "~")
     end
   end
+end
+
+
+local alerted_deprecations = {}
+---Show deprecation notice once per `kind`.
+---
+---@param kind string
+function core.deprecation_log(kind)
+  if alerted_deprecations[kind] then return end
+  alerted_deprecations[kind] = true
+  core.warn("Used deprecated functionality [%s]. Check if your plugins are up to date.", kind)
 end
 
 
