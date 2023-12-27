@@ -43,7 +43,7 @@ local function save(filename)
     core.log("Saved \"%s\"", saved_filename)
   else
     core.error(err)
-    core.nag_view:show("Saving failed", string.format("Could not save \"%s\" do you want to save to another location?", doc().filename), {
+    core.nag_view:show("Saving failed", string.format("Couldn't save file \"%s\". Do you want to save to another location?", doc().filename), {
       { text = "No", default_no = true },
       { text = "Yes", default_yes = true }
     }, function(item)
@@ -340,10 +340,11 @@ local commands = {
         local text = dv.doc:get_text(line1, 1, line1, col1)
         if #text >= indent_size and text:find("^ *$") then
           dv.doc:delete_to_cursor(idx, 0, -indent_size)
-          return
+          goto continue
         end
       end
       dv.doc:delete_to_cursor(idx, translate.previous_char)
+      ::continue::
     end
   end,
 
@@ -542,6 +543,11 @@ local commands = {
 
   ["doc:toggle-line-ending"] = function(dv)
     dv.doc.crlf = not dv.doc.crlf
+  end,
+
+  ["doc:toggle-overwrite"] = function(dv)
+    dv.doc.overwrite = not dv.doc.overwrite
+    core.blink_reset() -- to show the cursor has changed edit modes
   end,
 
   ["doc:save-as"] = function(dv)
