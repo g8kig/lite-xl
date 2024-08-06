@@ -27,8 +27,8 @@ local function save_session()
   local fp = io.open(USERDIR .. PATHSEP .. "session.lua", "w")
   if fp then
     fp:write("return {recents=", common.serialize(core.recent_projects),
-      ", window=", common.serialize(table.pack(system.get_window_size())),
-      ", window_mode=", common.serialize(system.get_window_mode()),
+      ", window=", common.serialize(table.pack(system.get_window_size(core.window))),
+      ", window_mode=", common.serialize(system.get_window_mode(core.window)),
       ", previous_find=", common.serialize(core.previous_find),
       ", previous_replace=", common.serialize(core.previous_replace),
       "}\n")
@@ -689,12 +689,16 @@ function core.init()
     EXEDIR  = common.normalize_volume(EXEDIR)
   end
 
+  core.window = renwindow._restore()
+  if core.window == nil then
+    core.window = renwindow.create("")
+  end
   do
     local session = load_session()
     if session.window_mode == "normal" then
-      system.set_window_size(table.unpack(session.window))
+      system.set_window_size(core.window, table.unpack(session.window))
     elseif session.window_mode == "maximized" then
-      system.set_window_mode("maximized")
+      system.set_window_mode(core.window, "maximized")
     end
     core.recent_projects = session.recents or {}
     core.previous_find = session.previous_find or {}
@@ -922,7 +926,10 @@ end
 
 
 function core.restart()
-  quit_with_function(function() core.restart_request = true end)
+  quit_with_function(function()
+    core.restart_request = true
+    core.window:_persist()
+  end)
 end
 
 
@@ -1127,8 +1134,14 @@ function core.show_title_bar(show)
 end
 
 
+local thread_counter = 0
 function core.add_thread(f, weak_ref, ...)
-  local key = weak_ref or #core.threads + 1
+  local key = weak_ref
+  if not key then
+    thread_counter = thread_counter + 1
+    key = thread_counter
+  end
+  assert(core.threads[key] == nil, "Duplicate thread reference")
   local args = {...}
   local fn = function() return core.try(f, table.unpack(args)) end
   core.threads[key] = { cr = coroutine.create(fn), wake = 0 }
@@ -1303,24 +1316,11 @@ function core.on_event(type, ...)
   elseif type == "touchmoved" then
     core.root_view:on_touch_moved(...)
   elseif type == "resized" then
-    core.window_mode = system.get_window_mode()
+    core.window_mode = system.get_window_mode(core.window)
   elseif type == "minimized" or type == "maximized" or type == "restored" then
     core.window_mode = type == "restored" and "normal" or type
   elseif type == "filedropped" then
-    if not core.root_view:on_file_dropped(...) then
-      local filename, mx, my = ...
-      local info = system.get_file_info(filename)
-      if info and info.type == "dir" then
-        system.exec(string.format("%q %q", EXEFILE, filename))
-      else
-        local ok, doc = core.try(core.open_doc, filename)
-        if ok then
-          local node = core.root_view.root_node:get_child_overlapping_point(mx, my)
-          node:set_active_view(node.active_view)
-          core.root_view:open_doc(doc)
-        end
-      end
-    end
+    core.root_view:on_file_dropped(...)
   elseif type == "focuslost" then
     core.root_view:on_focus_lost(...)
   elseif type == "quit" then
@@ -1363,7 +1363,7 @@ function core.step()
     core.redraw = true
   end
 
-  local width, height = renderer.get_size()
+  local width, height = core.window:get_size()
 
   -- update
   core.root_view.size.x, core.root_view.size.y = width, height
@@ -1383,12 +1383,12 @@ function core.step()
   -- update window title
   local current_title = get_title_filename(core.active_view)
   if current_title ~= nil and current_title ~= core.window_title then
-    system.set_window_title(core.compose_window_title(current_title))
+    system.set_window_title(core.window, core.compose_window_title(current_title))
     core.window_title = current_title
   end
 
   -- draw
-  renderer.begin_frame()
+  renderer.begin_frame(core.window)
   core.clip_rect_stack[1] = { 0, 0, width, height }
   renderer.set_clip_rect(table.unpack(core.clip_rect_stack[1]))
   core.root_view:draw()
@@ -1402,16 +1402,20 @@ local run_threads = coroutine.wrap(function()
     local max_time = 1 / config.fps - 0.004
     local minimal_time_to_wake = math.huge
 
+    local threads = {}
+    -- We modify core.threads while iterating, both by removing dead threads,
+    -- and by potentially adding more threads while we yielded early,
+    -- so we need to extract the threads list and iterate over that instead.
     for k, thread in pairs(core.threads) do
-      -- run thread
-      if thread.wake < system.get_time() then
+      threads[k] = thread
+    end
+
+    for k, thread in pairs(threads) do
+      -- Run thread if it wasn't deleted externally and it's time to resume it
+      if core.threads[k] and thread.wake < system.get_time() then
         local _, wait = assert(coroutine.resume(thread.cr))
         if coroutine.status(thread.cr) == "dead" then
-          if type(k) == "number" then
-            table.remove(core.threads, k)
-          else
-            core.threads[k] = nil
-          end
+          core.threads[k] = nil
         else
           wait = wait or (1/30)
           thread.wake = system.get_time() + wait
@@ -1456,7 +1460,7 @@ function core.run()
     if core.restart_request or core.quit_request then break end
 
     if not did_redraw then
-      if system.window_has_focus() or not did_step or run_threads_full < 2 then
+      if system.window_has_focus(core.window) or not did_step or run_threads_full < 2 then
         local now = system.get_time()
         if not next_step then -- compute the time until the next blink
           local t = now - core.blink_start

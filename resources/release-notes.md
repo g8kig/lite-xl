@@ -25,7 +25,7 @@ For OS requirements, please refer to the relevant section in the [README].
 Please go to [changelog.md] for detailed description of all the changes.
 
 <!-- UPDATE THIS! -->
-**Commits since last version**: https://github.com/lite-xl/lite-xl/compare/v2.1.3...${RELEASE_TAG}
+**Commits since last version**: https://github.com/lite-xl/lite-xl/compare/${LAST_RELEASE_TAG}...${RELEASE_TAG}
 
 
 [win32-setup]:      https://github.com/lite-xl/lite-xl/releases/download/${RELEASE_TAG}/LiteXL-${RELEASE_TAG}-addons-i686-setup.exe
@@ -36,4 +36,4 @@ Please go to [changelog.md] for detailed description of all the changes.
 [macintel-dmg]:     https://github.com/lite-xl/lite-xl/releases/download/${RELEASE_TAG}/lite-xl-${RELEASE_TAG}-macos-x86_64.dmg
 [macarm-dmg]:       https://github.com/lite-xl/lite-xl/releases/download/${RELEASE_TAG}/lite-xl-${RELEASE_TAG}-macos-arm64.dmg
 [README]:           https://github.com/lite-xl/lite-xl?tab=readme-ov-file#installing-prebuilt
-[changelog]:        https://github.com/lite-xl/lite-xl/blob/${RELEASE_TAG}/changelog.md
+[changelog.md]:     https://github.com/lite-xl/lite-xl/blob/${RELEASE_TAG}/changelog.md
