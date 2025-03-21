@@ -11,6 +11,8 @@ local View = require "core.view"
 ---@field super core.view
 local DocView = View:extend()
 
+function DocView:__tostring() return "DocView" end
+
 DocView.context = "session"
 
 local function move_to_line_offset(dv, line, col, offset)
@@ -201,7 +203,7 @@ end
 function DocView:get_x_offset_col(line, x)
   local line_text = self.doc.lines[line]
 
-  local xoffset, last_i, i = 0, 1, 1
+  local xoffset, i = 0, 1
   local default_font = self:get_font()
   local _, indent_size = self.doc:get_indent_info()
   default_font:set_tab_size(indent_size)
@@ -217,11 +219,10 @@ function DocView:get_x_offset_col(line, x)
     else
       for char in common.utf8_chars(text) do
         local w = font:get_width(char, {tab_offset = xoffset})
-        if xoffset >= x then
-          return (xoffset - x > w / 2) and last_i or i
+        if xoffset + w >= x then
+          return (x <= xoffset + (w / 2)) and i or i + #char
         end
         xoffset = xoffset + w
-        last_i = i
         i = i + #char
       end
     end
@@ -608,6 +609,5 @@ function DocView:draw()
 
   self:draw_scrollbar()
 end
-
 
 return DocView
