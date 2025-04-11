@@ -276,7 +276,7 @@ end
 
 
 function core.configure_borderless_window()
-  system.set_window_bordered(not config.borderless)
+  system.set_window_bordered(core.window, not config.borderless)
   core.title_view:configure_hit_test(config.borderless)
   core.title_view.visible = config.borderless
 end
@@ -728,7 +728,7 @@ function core.set_active_view(view)
   -- Reset the IME even if the focus didn't change
   ime.stop()
   if view ~= core.active_view then
-    system.text_input(view:supports_text_input())
+    system.text_input(core.window, view:supports_text_input())
     if core.active_view and core.active_view.force_focus then
       core.next_active_view = view
       return
