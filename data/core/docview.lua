@@ -6,6 +6,7 @@ local keymap = require "core.keymap"
 local translate = require "core.doc.translate"
 local ime = require "core.ime"
 local View = require "core.view"
+local ContextMenu = require "core.contextmenu"
 
 ---@class core.docview : core.view
 ---@field super core.view
@@ -421,7 +422,7 @@ function DocView:update()
   end
 
   -- update blink timer
-  if self == core.active_view and not self.mouse_selecting then
+  if not config.disable_blink and system.window_has_focus(core.window) and self == core.active_view and not self.mouse_selecting then
     local T, t0 = config.blink_period, core.blink_start
     local ta, tb = core.blink_timer, system.get_time()
     if ((tb - t0) % T < T / 2) ~= ((ta - t0) % T < T / 2) then
@@ -608,6 +609,17 @@ function DocView:draw()
   core.pop_clip_rect()
 
   self:draw_scrollbar()
+end
+
+function DocView:on_context_menu()
+  return { items = {
+    { text = "Cut",     command = "doc:cut" },
+    { text = "Copy",    command = "doc:copy" },
+    { text = "Paste",   command = "doc:paste" },
+    ContextMenu.DIVIDER,
+    { text = "Find",    command = "find-replace:find"    },
+    { text = "Replace", command = "find-replace:replace" }
+  } }, self
 end
 
 return DocView

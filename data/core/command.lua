@@ -80,7 +80,7 @@ end
 ---If a command already exists, it will be replaced.
 ---@see core.command.predicate
 ---@see core.command.command_name
----@param predicate core.command.predicate
+---@param predicate? core.command.predicate
 ---@param map { [core.command.command_name]: fun(...: any) }
 function command.add(predicate, map)
   predicate = command.generate_predicate(predicate)
@@ -175,7 +175,7 @@ end
 function command.add_defaults()
   local reg = {
     "core", "root", "command", "doc", "findreplace",
-    "files", "dialog", "log", "statusbar"
+    "files", "dialog", "log", "statusbar", "contextmenu"
   }
   for _, name in ipairs(reg) do
     require("core.commands." .. name)
